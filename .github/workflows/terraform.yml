@@ -4,26 +4,19 @@ name: Create an ec2 instance
 on:
   workflow_dispatch:
     # Define inputs that are required for the manual trigger
-    # inputs:
-    #   instanceName:
-    #     description: 'Name of the AWS Instance'  # What's this input for?
-    #     required: true  # Is it optional or required?
-    #   awsRegion:
-    #     description: 'AWS Region for the instance'
-    #     required: true
-    #   instanceType:
-    #     description: 'AWS instance type'
-    #     required: true
-    #   action:
-    #     description: 'Action to perform (apply/destroy)'
-    #     required: true
+    inputs:
+      awsRegion:
+        description: 'AWS Region for the resources'
+        required: true
+      action:
+        description: 'Action to perform (apply/destroy)'
+        required: true
 # Jobs to be executed in this workflow
 jobs:
-  # Job for applying the ec2 instance
+  # Job for applying the SQS, SNS, Lambda and API Gateway
   apply_ec2:
     # Use the latest Ubuntu runner
     runs-on: ubuntu-latest
-    
     # Execute this step only if the action input is "apply"
     if: ${{ github.event.inputs.action == 'apply' }}
     # Define the steps for this job
@@ -59,7 +52,7 @@ jobs:
     # Apply the Terraform plan
     - name: Terraform vars
     - name: terraform apply
-      run: terraform apply -var instanceName=${{ github.event.inputs.instanceName }} -var awsRegion=${{ github.event.inputs.awsRegion }} -var instanceType=${{ github.event.inputs.instanceType }} -auto-approve
+      run: terraform apply -var awsRegion=${{ github.event.inputs.awsRegion }} -auto-approve
       working-directory: .
 
   # Destroying the  ec2 instance
@@ -93,5 +86,5 @@ jobs:
     # Destroy all resources 
     - name: Terraform Destroy
     - name: terraform apply
-      run: terraform destroy -var instanceName=${{ github.event.inputs.instanceName }} -var awsRegion=${{ github.event.inputs.awsRegion }} -auto-approve
+      run: terraform destroy  -var awsRegion=${{ github.event.inputs.awsRegion }} -auto-approve
       working-directory: .
